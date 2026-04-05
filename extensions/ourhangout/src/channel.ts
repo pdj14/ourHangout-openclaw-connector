@@ -33,17 +33,20 @@ export const ourHangoutChannelPlugin = createChatChannelPlugin<OurHangoutResolve
       inspectAccount(cfg: OpenClawConfig, accountId?: string | null) {
         return inspectOurHangoutAccount(cfg, accountId);
       }
-    },
-    config: {
-      listAccountIds: listOurHangoutAccountIds,
-      resolveAccount,
-      defaultAccountId,
-      isEnabled: (_account: OurHangoutResolvedAccount, cfg: OpenClawConfig) => listOurHangoutAccountIds(cfg).length > 0,
-      isConfigured: (account: OurHangoutResolvedAccount) =>
-        !!account.serverBaseUrl && !!account.authToken && !!account.accountId && !!account.pobiId && !!account.botKey
     }
   }),
   security: ourHangoutSecurity,
   threading: ourHangoutThreading,
   outbound: ourHangoutOutbound
+});
+
+Object.assign(ourHangoutChannelPlugin as Record<string, unknown>, {
+  config: {
+    listAccountIds: listOurHangoutAccountIds,
+    resolveAccount,
+    defaultAccountId,
+    isEnabled: (_account: OurHangoutResolvedAccount, cfg: OpenClawConfig) => listOurHangoutAccountIds(cfg).length > 0,
+    isConfigured: (account: OurHangoutResolvedAccount) =>
+      !!account.serverBaseUrl && !!account.authToken && !!account.accountId && !!account.pobiId && !!account.botKey
+  }
 });
