@@ -168,14 +168,11 @@ export class OurHangoutRuntimeWorker {
     this.afterOrderSeq = Math.max(this.afterOrderSeq, persisted.afterOrderSeq);
     this.lastSyncAt = persisted.lastSyncAt;
     this.lastMessageAt = persisted.lastMessageAt;
-    this.logger.info?.(
-      {
-        accountId: this.account.accountId,
-        afterOrderSeq: this.afterOrderSeq,
-        stateFile: this.stateFilePath
-      },
-      'Loaded persisted OurHangout channel state'
-    );
+    this.logger.info?.('Loaded persisted OurHangout channel state', {
+      accountId: this.account.accountId,
+      afterOrderSeq: this.afterOrderSeq,
+      stateFile: this.stateFilePath
+    });
   }
 
   private queuePersistState(): void {
