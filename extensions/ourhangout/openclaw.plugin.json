@@ -1,5 +1,7 @@
 {
   "id": "ourhangout",
+  "kind": "channel",
+  "channels": ["ourhangout"],
   "name": "OurHangout",
   "version": "0.1.0",
   "configSchema": {
