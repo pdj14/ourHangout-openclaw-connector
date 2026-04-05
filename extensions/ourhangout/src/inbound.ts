@@ -34,8 +34,12 @@ export async function dispatchOurHangoutInbound(api: any, event: OurHangoutInbou
 
   if (typeof dispatch !== 'function') {
     api?.logger?.warn?.(
-      { event },
-      'OurHangout channel runtime could not find an OpenClaw inbound dispatch hook'
+      'OurHangout channel runtime could not find an OpenClaw inbound dispatch hook',
+      {
+        accountId: event.accountId,
+        messageId: event.messageId,
+        sessionKey: event.sessionKey
+      }
     );
     return;
   }
