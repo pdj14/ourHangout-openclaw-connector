@@ -118,6 +118,29 @@ Files:
 
 - `deploy/ourhangout-openclaw-connector.service`
 - `deploy/SYSTEMD_SETUP_KO.md`
+- `install-service.sh`
+
+Fastest setup:
+
+```bash
+chmod +x install-service.sh
+./install-service.sh 7H2K9P
+```
+
+If you omit the code, the script will prompt for it:
+
+```bash
+chmod +x install-service.sh
+./install-service.sh
+```
+
+What the script does:
+
+1. Runs `npm install`
+2. Uses the pairing code once to register the connector
+3. Waits until `connector-auth-token.txt` is created
+4. Installs the `systemd` service
+5. Enables and starts the service
 
 Typical setup:
 

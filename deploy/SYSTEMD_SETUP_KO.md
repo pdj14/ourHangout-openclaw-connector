@@ -12,6 +12,34 @@
 
 ## 2. 최초 1회 수동 등록
 
+가장 쉬운 방법은 수동 단계를 직접 하지 않고
+repo 루트의 `install-service.sh`를 사용하는 것입니다.
+
+예:
+
+```bash
+chmod +x install-service.sh
+./install-service.sh 7H2K9P
+```
+
+또는 코드 입력 프롬프트 사용:
+
+```bash
+chmod +x install-service.sh
+./install-service.sh
+```
+
+이 스크립트는:
+
+1. `npm install`
+2. pairing code 등록
+3. `connector-auth-token.txt` 생성 확인
+4. systemd service 설치/시작
+
+을 한 번에 처리합니다.
+
+아래 내용은 수동으로 설치할 때의 절차입니다.
+
 먼저 앱에서 포비 연결 코드를 만들고,
 라즈베리파이에서 한 번 수동으로 실행합니다.
 
