@@ -4,10 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node connector.mjs"
+    "start": "node connector.mjs",
+    "channel:setup": "node scripts/setup-openclaw-channel.mjs",
+    "channel:smoke": "node scripts/smoke-openclaw-channel.mjs"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
+    "json5": "^2.2.3",
     "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "typescript": "^5.9.3"
   }
 }

@@ -1,0 +1,91 @@
+{
+  "id": "ourhangout",
+  "name": "OurHangout",
+  "version": "0.1.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "defaultAccount": {
+        "type": "string"
+      },
+      "pollIntervalMs": {
+        "type": "integer",
+        "minimum": 1000
+      },
+      "stateDir": {
+        "type": "string",
+        "minLength": 1
+      },
+      "dmPolicy": {
+        "type": "string",
+        "enum": ["open", "allowlist", "disabled"]
+      },
+      "allowFrom": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "accounts": {
+        "type": "object",
+        "minProperties": 1,
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["serverBaseUrl", "authToken", "accountId", "pobiId", "botKey"],
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "serverBaseUrl": {
+              "type": "string",
+              "minLength": 1
+            },
+            "authToken": {
+              "type": "string",
+              "minLength": 16
+            },
+            "accountId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "pobiId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "botKey": {
+              "type": "string",
+              "minLength": 1
+            },
+            "deviceKey": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sessionKeyPrefix": {
+              "type": "string"
+            },
+            "pollIntervalMs": {
+              "type": "integer",
+              "minimum": 1000
+            },
+            "stateDir": {
+              "type": "string",
+              "minLength": 1
+            },
+            "dmPolicy": {
+              "type": "string",
+              "enum": ["open", "allowlist", "disabled"]
+            },
+            "allowFrom": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

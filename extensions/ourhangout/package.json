@@ -1,0 +1,28 @@
+{
+  "name": "@ourhangout/openclaw-ourhangout",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./index.ts",
+  "scripts": {
+    "check": "tsc --noEmit -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "openclaw": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "typescript": "^5.9.3"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ],
+    "setupEntry": "./setup-entry.ts",
+    "channel": {
+      "id": "ourhangout",
+      "label": "OurHangout",
+      "blurb": "Connect OpenClaw to OurHangout Pobi direct chats."
+    }
+  }
+}
