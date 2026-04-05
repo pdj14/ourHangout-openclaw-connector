@@ -15,10 +15,12 @@ const localOpenClawBaseUrl = (process.env.OPENCLAW_LOCAL_BASE_URL ?? 'http://127
 const reconnectDelayMs = Number(process.env.CONNECTOR_RECONNECT_MS ?? 3000);
 const timeoutMs = Number(process.env.CONNECTOR_REQUEST_TIMEOUT_MS ?? 4000);
 const connectorTokenFile = resolveTokenFile(process.env.CONNECTOR_AUTH_TOKEN_FILE ?? './connector-auth-token.txt');
+const connectorLockFile = resolveTokenFile(process.env.CONNECTOR_LOCK_FILE ?? './connector.lock');
 
 let connectorAuthToken = (process.env.CONNECTOR_AUTH_TOKEN ?? '').trim();
 let botKeys = (process.env.CONNECTOR_BOT_KEYS ?? '*').trim();
 let wsUrl = '';
+let lockAcquired = false;
 
 function resolveTokenFile(filePath) {
   if (!filePath.trim()) {
@@ -52,6 +54,84 @@ function readSavedToken() {
 function saveToken(token) {
   fs.mkdirSync(path.dirname(connectorTokenFile), { recursive: true });
   fs.writeFileSync(connectorTokenFile, `${token}\n`, { encoding: 'utf8' });
+}
+
+function isPidAlive(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) {
+    return false;
+  }
+
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return error && error.code === 'EPERM';
+  }
+}
+
+function readLockInfo() {
+  try {
+    const raw = fs.readFileSync(connectorLockFile, 'utf8').trim();
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return isRecord(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function acquireLock() {
+  fs.mkdirSync(path.dirname(connectorLockFile), { recursive: true });
+
+  const payload = JSON.stringify(
+    {
+      pid: process.pid,
+      connectorId,
+      startedAt: new Date().toISOString()
+    },
+    null,
+    2
+  );
+
+  try {
+    const fd = fs.openSync(connectorLockFile, 'wx');
+    fs.writeFileSync(fd, `${payload}\n`, { encoding: 'utf8' });
+    fs.closeSync(fd);
+    lockAcquired = true;
+    return;
+  } catch (error) {
+    if (!error || error.code !== 'EEXIST') {
+      throw error;
+    }
+  }
+
+  const existing = readLockInfo();
+  if (existing?.pid && isPidAlive(Number(existing.pid))) {
+    throw new Error(
+      `Another connector instance is already running (pid=${existing.pid}, connectorId=${existing.connectorId || 'unknown'}). Stop the other process or service before starting a new one.`
+    );
+  }
+
+  fs.rmSync(connectorLockFile, { force: true });
+  const fd = fs.openSync(connectorLockFile, 'wx');
+  fs.writeFileSync(fd, `${payload}\n`, { encoding: 'utf8' });
+  fs.closeSync(fd);
+  lockAcquired = true;
+}
+
+function releaseLock() {
+  if (!lockAcquired) {
+    return;
+  }
+
+  try {
+    const existing = readLockInfo();
+    if (!existing || Number(existing.pid) === process.pid) {
+      fs.rmSync(connectorLockFile, { force: true });
+    }
+  } catch {
+    // ignore cleanup failures
+  }
 }
 
 function buildWebSocketUrl(token, currentBotKeys, baseUrl = hubWsBase) {
@@ -302,11 +382,39 @@ function connect() {
   });
 }
 
-ensureConnectorConfig()
+Promise.resolve()
+  .then(() => {
+    acquireLock();
+    return ensureConnectorConfig();
+  })
   .then(() => {
     connect();
   })
   .catch((error) => {
     console.error('[connector] startup failed', error);
+    releaseLock();
     process.exit(1);
   });
+
+process.on('exit', () => {
+  releaseLock();
+});
+
+for (const signal of ['SIGINT', 'SIGTERM']) {
+  process.on(signal, () => {
+    releaseLock();
+    process.exit(0);
+  });
+}
+
+process.on('uncaughtException', (error) => {
+  console.error('[connector] uncaught exception', error);
+  releaseLock();
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[connector] unhandled rejection', reason);
+  releaseLock();
+  process.exit(1);
+});

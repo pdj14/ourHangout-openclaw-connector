@@ -157,7 +157,34 @@ systemctl status ourhangout-openclaw-connector
 journalctl -u ourhangout-openclaw-connector -f
 ```
 
-## 10. If you see websocket 404
+## 10. How to check duplicate runs
+
+On the Raspberry Pi:
+
+```bash
+systemctl status ourhangout-openclaw-connector
+ps -ef | grep -E "connector.mjs|npm run start"
+```
+
+Normal state:
+
+- service is active
+- only one real connector process exists
+
+## 11. Duplicate-run protection
+
+This connector now creates a lock file before starting:
+
+- default: `./connector.lock`
+
+If another instance is already running, a second launch exits immediately with an error.
+
+That means:
+
+- running `npm run start` while the `systemd` service is already active is blocked
+- starting the service while a manual connector process is already running is blocked
+
+## 12. If you see websocket 404
 
 If registration succeeds but websocket fails with:
 
