@@ -29,6 +29,7 @@ async function readAccountConfig(configPath, accountAlias) {
   return {
     alias: resolved.alias,
     serverBaseUrl: normalizeString(account.serverBaseUrl),
+    wsUrl: normalizeString(account.wsUrl),
     authToken: normalizeString(account.authToken),
     accountId: normalizeString(account.accountId),
     pobiId: normalizeString(account.pobiId),
@@ -78,7 +79,8 @@ async function maybeSendMessage(account, roomId, text) {
 }
 
 async function connectWebSocket(account, timeoutMs) {
-  const wsUrl = `${toChannelWsUrl(account.serverBaseUrl)}?token=${encodeURIComponent(account.authToken)}`;
+  const baseWsUrl = normalizeString(account.wsUrl) || toChannelWsUrl(account.serverBaseUrl);
+  const wsUrl = `${baseWsUrl}?token=${encodeURIComponent(account.authToken)}`;
 
   return new Promise((resolve, reject) => {
     let settled = false;
