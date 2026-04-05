@@ -1,5 +1,5 @@
-import { createChatChannelPlugin, createChannelPluginBase } from 'openclaw/plugin-sdk/channel-core';
-import type { OpenClawConfig } from 'openclaw/plugin-sdk/channel-core';
+import { createChatChannelPlugin, createChannelPluginBase } from 'openclaw/plugin-sdk/core';
+import type { OpenClawConfig } from 'openclaw/plugin-sdk/core';
 import { inspectOurHangoutAccount, resolveOurHangoutAccount, type OurHangoutResolvedAccount } from './config.js';
 import { ourHangoutOutbound } from './outbound.js';
 import { ourHangoutSecurity } from './security.js';
