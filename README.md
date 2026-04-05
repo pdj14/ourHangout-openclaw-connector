@@ -36,7 +36,7 @@ PAIRING_CODE=7H2K9P
 CONNECTOR_ID=raspi-openclaw-1
 CONNECTOR_DEVICE_NAME=Living Room Pi
 CONNECTOR_MODE=http
-OPENCLAW_LOCAL_BASE_URL=http://127.0.0.1:18888
+OPENCLAW_LOCAL_BASE_URL=http://127.0.0.1:18789
 CONNECTOR_AUTH_TOKEN=
 CONNECTOR_AUTH_TOKEN_FILE=./connector-auth-token.txt
 CONNECTOR_RECONNECT_MS=3000
@@ -82,7 +82,7 @@ Steps:
 Before starting the connector, make sure OpenClaw is responding locally:
 
 ```bash
-curl -s http://127.0.0.1:18888/v1/messages \
+curl -s http://127.0.0.1:18789/v1/messages \
   -H "Content-Type: application/json" \
   -d '{"content":"hello"}'
 ```
