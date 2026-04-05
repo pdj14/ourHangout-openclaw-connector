@@ -102,11 +102,12 @@ function createAuthHeaders(authToken?: string): Record<string, string> {
 export class OurHangoutClient {
   constructor(
     public readonly serverBaseUrl: string,
+    public readonly wsUrl?: string,
     public readonly authToken?: string
   ) {}
 
   static fromAccount(account: OurHangoutResolvedAccount): OurHangoutClient {
-    return new OurHangoutClient(account.serverBaseUrl, account.authToken);
+    return new OurHangoutClient(account.serverBaseUrl, account.wsUrl, account.authToken);
   }
 
   static fromConfig(cfg: unknown, accountId?: string | null): OurHangoutClient {
@@ -277,6 +278,11 @@ export class OurHangoutClient {
   }
 
   private getChannelWsUrl(): string {
+    const configuredWsUrl = this.wsUrl?.trim();
+    if (configuredWsUrl) {
+      return configuredWsUrl.replace(/\/+$/, '');
+    }
+
     const baseUrl = normalizeBaseUrl(this.serverBaseUrl);
     if (/^https:/i.test(baseUrl)) {
       return `${baseUrl.replace(/^https:/i, 'wss:')}/v1/openclaw/channel/ws`;

@@ -5,6 +5,7 @@ export type OurHangoutDmPolicy = 'open' | 'allowlist' | 'disabled';
 export type OurHangoutAccountConfig = {
   enabled?: boolean;
   serverBaseUrl?: string;
+  wsUrl?: string;
   authToken?: string;
   accountId?: string;
   pobiId?: string;
@@ -30,6 +31,7 @@ export type OurHangoutResolvedAccount = {
   configAccountId: string;
   accountId: string;
   serverBaseUrl: string;
+  wsUrl?: string;
   authToken: string;
   pobiId: string;
   botKey: string;
@@ -113,6 +115,7 @@ export function resolveOurHangoutAccount(
   }
 
   const serverBaseUrl = normalizeServerBaseUrl(normalizeString(rawAccount.serverBaseUrl));
+  const wsUrl = normalizeString(rawAccount.wsUrl);
   const authToken = normalizeString(rawAccount.authToken);
   const resolvedAccountId = normalizeString(rawAccount.accountId);
   const pobiId = normalizeString(rawAccount.pobiId);
@@ -137,6 +140,7 @@ export function resolveOurHangoutAccount(
     configAccountId: requestedAccountId,
     accountId: resolvedAccountId,
     serverBaseUrl,
+    ...(wsUrl ? { wsUrl } : {}),
     authToken,
     pobiId,
     botKey,

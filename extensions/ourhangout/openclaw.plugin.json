@@ -44,6 +44,10 @@
               "type": "string",
               "minLength": 1
             },
+            "wsUrl": {
+              "type": "string",
+              "minLength": 1
+            },
             "authToken": {
               "type": "string",
               "minLength": 16

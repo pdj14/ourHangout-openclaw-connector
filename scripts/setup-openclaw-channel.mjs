@@ -77,6 +77,7 @@ function patchOpenClawConfig(config, input) {
       ...ensureObject(accounts[input.accountAlias]),
       enabled: true,
       serverBaseUrl: input.serverBaseUrl,
+      ...(input.wsUrl ? { wsUrl: input.wsUrl } : {}),
       authToken: input.registration.authToken,
       accountId: input.registration.accountId,
       pobiId: input.registration.pobiId,
@@ -108,6 +109,7 @@ async function main() {
     args['device-name'] || process.env.OPENCLAW_CHANNEL_DEVICE_NAME || 'Living Room Pi'
   );
   const platform = normalizeString(args.platform || process.env.OPENCLAW_CHANNEL_PLATFORM || 'linux');
+  const configuredWsUrl = normalizeString(args['ws-url'] || process.env.OPENCLAW_CHANNEL_WS_URL);
   const configPath = path.resolve(expandHome(args.config || process.env.OPENCLAW_CONFIG_PATH || getDefaultOpenClawConfigPath()));
   const pollIntervalMs = Math.max(
     1000,
@@ -142,12 +144,13 @@ async function main() {
     pollIntervalMs,
     registration,
     serverBaseUrl,
-    stateDir
+    stateDir,
+    wsUrl: configuredWsUrl
   });
 
   const writtenPath = await writeOpenClawConfig(configPath, nextConfig);
 
-  const wsUrl = registration.wsUrl || `${toChannelWsUrl(serverBaseUrl)}?token=<hidden>`;
+  const effectiveWsUrl = configuredWsUrl || registration.wsUrl || `${toChannelWsUrl(serverBaseUrl)}?token=<hidden>`;
   console.log('[ourhangout-channel] registration complete');
   console.log(`  config: ${writtenPath}`);
   console.log(`  plugin path: ${pluginPath}`);
@@ -155,7 +158,7 @@ async function main() {
   console.log(`  account id: ${registration.accountId}`);
   console.log(`  pobi id: ${registration.pobiId}`);
   console.log(`  bot key: ${registration.botKey}`);
-  console.log(`  ws: ${wsUrl}`);
+  console.log(`  ws: ${effectiveWsUrl}`);
   if (stateDir) {
     console.log(`  state dir: ${stateDir}`);
   }
