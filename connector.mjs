@@ -8,7 +8,8 @@ dotenv.config();
 const hubWsBase = process.env.HUB_WS_URL ?? 'ws://localhost:3000/v1/openclaw/connector/ws';
 const connectorId = process.env.CONNECTOR_ID ?? `connector-local-${Date.now()}`;
 const connectorDeviceName = process.env.CONNECTOR_DEVICE_NAME ?? process.env.DEVICE_NAME ?? connectorId;
-const pairingCode = (process.env.PAIRING_CODE ?? '').trim().toUpperCase();
+const cliPairingCode = (process.argv[2] ?? '').trim().toUpperCase();
+const pairingCode = cliPairingCode || (process.env.PAIRING_CODE ?? '').trim().toUpperCase();
 const connectorMode = (process.env.CONNECTOR_MODE ?? 'http').trim().toLowerCase();
 const localOpenClawBaseUrl = (process.env.OPENCLAW_LOCAL_BASE_URL ?? 'http://127.0.0.1:18789').trim();
 const reconnectDelayMs = Number(process.env.CONNECTOR_RECONNECT_MS ?? 3000);
@@ -293,6 +294,11 @@ function connect() {
 
   socket.on('error', (error) => {
     console.error('[connector] websocket error', error);
+    if (error instanceof Error && /unexpected server response:\s*404/i.test(error.message)) {
+      console.error(
+        '[connector] WebSocket handshake returned 404. This usually means your reverse proxy did not forward the WebSocket Upgrade request. Check Synology reverse proxy WebSocket support or try the direct backend ws URL.'
+      );
+    }
   });
 }
 

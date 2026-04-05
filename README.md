@@ -49,6 +49,18 @@ Run:
 npm run start
 ```
 
+You can also pass the pairing code directly on the command line:
+
+```bash
+npm run start -- 7H2K9P
+```
+
+or:
+
+```bash
+node connector.mjs 7H2K9P
+```
+
 ## 4. What happens on first run
 
 1. The connector registers with the server using `PAIRING_CODE`
@@ -96,3 +108,22 @@ On the Raspberry Pi:
 3. Set `.env`
 4. Paste the app pairing code
 5. Run `npm run start`
+
+## 9. If you see websocket 404
+
+If registration succeeds but websocket fails with:
+
+```text
+Unexpected server response: 404
+```
+
+that usually means:
+
+- your Synology reverse proxy did not forward WebSocket Upgrade headers
+- or you are connecting to a public URL that serves normal HTTP but not WebSocket upgrades
+
+What to check:
+
+1. Make sure the reverse proxy / DSM rule allows WebSocket upgrades
+2. Test the direct backend websocket URL if available
+3. Confirm `HUB_WS_URL` matches the same public URL the app uses
