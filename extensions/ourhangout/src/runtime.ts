@@ -20,6 +20,14 @@ function createLogger(api: any, accountId: string): RuntimeLogger {
   return api?.logger?.child?.({ channel: 'ourhangout', accountId }) ?? api?.logger ?? console;
 }
 
+function describeError(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
+}
+
 export class OurHangoutRuntimeWorker {
   private readonly client: OurHangoutClient;
   private readonly stateFilePath: string;
@@ -82,7 +90,7 @@ export class OurHangoutRuntimeWorker {
     try {
       await this.syncUntilCaughtUp(handler);
     } catch (error) {
-      this.logger.warn?.({ error }, 'OurHangout polling sync failed');
+      this.logger.warn?.(`OurHangout polling sync failed: ${describeError(error)}`);
     } finally {
       this.schedulePoll(handler);
     }
@@ -118,14 +126,14 @@ export class OurHangoutRuntimeWorker {
           }
         },
         onError: (error) => {
-          this.logger.warn?.({ error }, 'OurHangout websocket error');
+          this.logger.warn?.(`OurHangout websocket error: ${describeError(error)}`);
         },
         onMessage: (event) => {
           void this.handleInboundEvent(event, handler);
         }
       });
     } catch (error) {
-      this.logger.warn?.({ error }, 'OurHangout websocket unavailable; using polling');
+      this.logger.warn?.(`OurHangout websocket unavailable; using polling: ${describeError(error)}`);
     }
   }
 
@@ -168,11 +176,9 @@ export class OurHangoutRuntimeWorker {
     this.afterOrderSeq = Math.max(this.afterOrderSeq, persisted.afterOrderSeq);
     this.lastSyncAt = persisted.lastSyncAt;
     this.lastMessageAt = persisted.lastMessageAt;
-    this.logger.info?.('Loaded persisted OurHangout channel state', {
-      accountId: this.account.accountId,
-      afterOrderSeq: this.afterOrderSeq,
-      stateFile: this.stateFilePath
-    });
+    this.logger.info?.(
+      `Loaded persisted OurHangout channel state for ${this.account.accountId} (afterOrderSeq=${this.afterOrderSeq}, stateFile=${this.stateFilePath})`
+    );
   }
 
   private queuePersistState(): void {
@@ -189,12 +195,7 @@ export class OurHangoutRuntimeWorker {
       })
       .catch((error) => {
         this.logger.warn?.(
-          {
-            error,
-            accountId: this.account.accountId,
-            stateFile: this.stateFilePath
-          },
-          'Failed to persist OurHangout channel state'
+          `Failed to persist OurHangout channel state for ${this.account.accountId} (${this.stateFilePath}): ${describeError(error)}`
         );
       });
   }
