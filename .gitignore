@@ -1,0 +1,4 @@
+node_modules/
+.env
+connector-auth-token.txt
+npm-debug.log*
