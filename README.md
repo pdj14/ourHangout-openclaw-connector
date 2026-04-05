@@ -109,7 +109,32 @@ On the Raspberry Pi:
 4. Paste the app pairing code
 5. Run `npm run start`
 
-## 9. If you see websocket 404
+## 9. Run as a service
+
+After first pairing succeeds and `connector-auth-token.txt` exists,
+you can run the connector as a `systemd` service instead of keeping a terminal open.
+
+Files:
+
+- `deploy/ourhangout-openclaw-connector.service`
+- `deploy/SYSTEMD_SETUP_KO.md`
+
+Typical setup:
+
+```bash
+sudo cp deploy/ourhangout-openclaw-connector.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now ourhangout-openclaw-connector
+```
+
+Check:
+
+```bash
+systemctl status ourhangout-openclaw-connector
+journalctl -u ourhangout-openclaw-connector -f
+```
+
+## 10. If you see websocket 404
 
 If registration succeeds but websocket fails with:
 
