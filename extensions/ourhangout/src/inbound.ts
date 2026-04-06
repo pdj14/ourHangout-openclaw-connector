@@ -40,6 +40,20 @@ function normalizeText(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+const KNOWN_PROVIDER_IDS = new Set([
+  'anthropic',
+  'github-copilot',
+  'modelstudio',
+  'ollama',
+  'openai',
+  'openai-codex',
+  'openrouter',
+  'venice',
+  'vllm',
+  'xai',
+  'zai'
+]);
+
 function resolveConfiguredModelRef(api: any): string {
   return (
     normalizeText(api?.config?.models?.resolvedDefault) ||
@@ -61,7 +75,8 @@ function resolveDefaultProvider(api: any): string {
   }
 
   const configuredModelRef = resolveConfiguredModelRef(api);
-  const modelProvider = normalizeText(configuredModelRef.split('/')[0]);
+  const modelProviderCandidate = normalizeText(configuredModelRef.split('/')[0]).toLowerCase();
+  const modelProvider = KNOWN_PROVIDER_IDS.has(modelProviderCandidate) ? modelProviderCandidate : '';
   if (modelProvider) {
     return modelProvider;
   }
