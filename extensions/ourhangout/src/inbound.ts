@@ -55,14 +55,29 @@ const KNOWN_PROVIDER_IDS = new Set([
 ]);
 
 function resolveConfiguredModelRef(api: any): string {
-  return (
+  const primary =
     normalizeText(api?.config?.models?.resolvedDefault) ||
     normalizeText(api?.config?.models?.defaultModel) ||
     normalizeText(api?.config?.agents?.model) ||
     normalizeText(api?.config?.model) ||
-    normalizeText(api?.runtime?.agent?.defaults?.model) ||
-    'openrouter/auto'
-  );
+    normalizeText(api?.runtime?.agent?.defaults?.model);
+
+  const fallbackCandidates = [
+    ...(Array.isArray(api?.config?.models?.allowed) ? api.config.models.allowed : []),
+    ...(Array.isArray(api?.config?.models?.fallbacks) ? api.config.models.fallbacks : [])
+  ]
+    .filter((value): value is string => typeof value === 'string')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (/^openrouter\/(?:openrouter\/)?auto$/i.test(primary)) {
+    const explicitOpenRouter = fallbackCandidates.find((value) => /^openrouter\/.+\/.+/i.test(value));
+    if (explicitOpenRouter) {
+      return explicitOpenRouter;
+    }
+  }
+
+  return primary || 'openrouter/auto';
 }
 
 function resolveDefaultProvider(api: any): string {
