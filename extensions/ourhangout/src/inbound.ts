@@ -74,6 +74,20 @@ function resolveDefaultModel(api: any): string {
   return 'openrouter/auto';
 }
 
+function normalizeModelForRun(model: string): string {
+  const trimmed = normalizeText(model);
+  if (!trimmed) {
+    return 'auto';
+  }
+
+  const slashIndex = trimmed.indexOf('/');
+  if (slashIndex === -1) {
+    return trimmed;
+  }
+
+  return trimmed.slice(slashIndex + 1);
+}
+
 function resolveAccountForEvent(api: any, event: { accountId: string; pobiId: string }): OurHangoutResolvedAccount {
   const cfg = api?.config ?? api?.runtime?.config ?? {};
 
@@ -145,8 +159,7 @@ export async function dispatchOurHangoutInbound(
   const workspaceDir = runtimeAgent.resolveAgentWorkspaceDir(cfg);
   const timeoutMs = runtimeAgent.resolveAgentTimeoutMs(cfg);
   const provider = resolveDefaultProvider(api);
-  const model = resolveDefaultModel(api);
-  const thinkingLevel = runtimeAgent.resolveThinkingDefault(cfg, provider, model);
+  const model = normalizeModelForRun(resolveDefaultModel(api));
   const sentTexts = new Set<string>();
 
   await runtimeAgent.ensureAgentWorkspace(cfg);
@@ -164,7 +177,6 @@ export async function dispatchOurHangoutInbound(
     prompt: buildPrompt(event),
     provider,
     model,
-    thinkingLevel,
     timeoutMs,
     runId: randomUUID(),
     onBlockReply: async (payload: { text?: string }) => {
