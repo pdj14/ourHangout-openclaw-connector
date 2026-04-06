@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import path from 'path';
 import { OurHangoutClient } from './client.js';
 import { listOurHangoutAccountIds, resolveOurHangoutAccount, type OurHangoutResolvedAccount } from './config.js';
 import { buildDirectSessionKey } from './threading.js';
@@ -105,7 +106,8 @@ export async function dispatchOurHangoutInbound(
   const client = OurHangoutClient.fromAccount(account);
   const cfg = api.config;
   const sessionId = buildSessionId(event);
-  const sessionFile = runtimeAgent.session.resolveSessionFilePath(cfg, sessionId);
+  const agentDir = runtimeAgent.resolveAgentDir(cfg);
+  const sessionFile = path.join(agentDir, 'sessions', `${sessionId}.jsonl`);
   const workspaceDir = runtimeAgent.resolveAgentWorkspaceDir(cfg);
   const timeoutMs = runtimeAgent.resolveAgentTimeoutMs(cfg);
   const provider = runtimeAgent.defaults.provider;
