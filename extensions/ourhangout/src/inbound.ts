@@ -40,33 +40,42 @@ function normalizeText(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-function resolveDefaultProvider(api: any): string {
-  const runtimeProvider = normalizeText(api?.runtime?.agent?.defaults?.provider);
-  if (runtimeProvider) {
-    return runtimeProvider;
-  }
+function resolveConfiguredModelRef(api: any): string {
+  return (
+    normalizeText(api?.config?.models?.resolvedDefault) ||
+    normalizeText(api?.config?.models?.defaultModel) ||
+    normalizeText(api?.config?.agents?.model) ||
+    normalizeText(api?.config?.model) ||
+    normalizeText(api?.runtime?.agent?.defaults?.model) ||
+    'openrouter/auto'
+  );
+}
 
+function resolveDefaultProvider(api: any): string {
   const configProvider =
-    normalizeText(api?.config?.agents?.provider) ||
     normalizeText(api?.config?.models?.defaultProvider) ||
+    normalizeText(api?.config?.agents?.provider) ||
     normalizeText(api?.config?.provider);
   if (configProvider) {
     return configProvider;
+  }
+
+  const configuredModelRef = resolveConfiguredModelRef(api);
+  const modelProvider = normalizeText(configuredModelRef.split('/')[0]);
+  if (modelProvider) {
+    return modelProvider;
+  }
+
+  const runtimeProvider = normalizeText(api?.runtime?.agent?.defaults?.provider);
+  if (runtimeProvider) {
+    return runtimeProvider;
   }
 
   return 'openrouter';
 }
 
 function resolveDefaultModel(api: any): string {
-  const runtimeModel = normalizeText(api?.runtime?.agent?.defaults?.model);
-  if (runtimeModel) {
-    return runtimeModel;
-  }
-
-  const configModel =
-    normalizeText(api?.config?.agents?.model) ||
-    normalizeText(api?.config?.models?.defaultModel) ||
-    normalizeText(api?.config?.model);
+  const configModel = resolveConfiguredModelRef(api);
   if (configModel) {
     return configModel;
   }
