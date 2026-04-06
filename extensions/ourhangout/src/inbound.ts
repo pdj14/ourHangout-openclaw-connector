@@ -40,6 +40,40 @@ function normalizeText(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function resolveDefaultProvider(api: any): string {
+  const runtimeProvider = normalizeText(api?.runtime?.agent?.defaults?.provider);
+  if (runtimeProvider) {
+    return runtimeProvider;
+  }
+
+  const configProvider =
+    normalizeText(api?.config?.agents?.provider) ||
+    normalizeText(api?.config?.models?.defaultProvider) ||
+    normalizeText(api?.config?.provider);
+  if (configProvider) {
+    return configProvider;
+  }
+
+  return 'openrouter';
+}
+
+function resolveDefaultModel(api: any): string {
+  const runtimeModel = normalizeText(api?.runtime?.agent?.defaults?.model);
+  if (runtimeModel) {
+    return runtimeModel;
+  }
+
+  const configModel =
+    normalizeText(api?.config?.agents?.model) ||
+    normalizeText(api?.config?.models?.defaultModel) ||
+    normalizeText(api?.config?.model);
+  if (configModel) {
+    return configModel;
+  }
+
+  return 'openrouter/auto';
+}
+
 function resolveAccountForEvent(api: any, event: { accountId: string; pobiId: string }): OurHangoutResolvedAccount {
   const cfg = api?.config ?? api?.runtime?.config ?? {};
 
@@ -110,8 +144,8 @@ export async function dispatchOurHangoutInbound(
   const sessionFile = path.join(agentDir, 'sessions', `${sessionId}.jsonl`);
   const workspaceDir = runtimeAgent.resolveAgentWorkspaceDir(cfg);
   const timeoutMs = runtimeAgent.resolveAgentTimeoutMs(cfg);
-  const provider = runtimeAgent.defaults.provider;
-  const model = runtimeAgent.defaults.model;
+  const provider = resolveDefaultProvider(api);
+  const model = resolveDefaultModel(api);
   const thinkingLevel = runtimeAgent.resolveThinkingDefault(cfg, provider, model);
   const sentTexts = new Set<string>();
 
