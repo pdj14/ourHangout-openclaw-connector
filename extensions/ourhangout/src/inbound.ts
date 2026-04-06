@@ -66,19 +66,19 @@ function resolveConfiguredModelRef(api: any): string {
 }
 
 function resolveDefaultProvider(api: any): string {
+  const configuredModelRef = resolveConfiguredModelRef(api);
+  const modelProviderCandidate = normalizeText(configuredModelRef.split('/')[0]).toLowerCase();
+  const modelProvider = KNOWN_PROVIDER_IDS.has(modelProviderCandidate) ? modelProviderCandidate : '';
+  if (modelProvider) {
+    return modelProvider;
+  }
+
   const configProvider =
     normalizeText(api?.config?.models?.defaultProvider) ||
     normalizeText(api?.config?.agents?.provider) ||
     normalizeText(api?.config?.provider);
   if (configProvider) {
     return configProvider;
-  }
-
-  const configuredModelRef = resolveConfiguredModelRef(api);
-  const modelProviderCandidate = normalizeText(configuredModelRef.split('/')[0]).toLowerCase();
-  const modelProvider = KNOWN_PROVIDER_IDS.has(modelProviderCandidate) ? modelProviderCandidate : '';
-  if (modelProvider) {
-    return modelProvider;
   }
 
   const runtimeProvider = normalizeText(api?.runtime?.agent?.defaults?.provider);
@@ -191,6 +191,7 @@ export async function dispatchOurHangoutInbound(
   api?.logger?.info?.(
     `OurHangout agent run starting (accountId=${event.accountId}, sessionId=${sessionId}, sessionKey=${event.sessionKey})`
   );
+  api?.logger?.info?.(`OurHangout agent model selection (provider=${provider}, model=${model})`);
 
   await runtimeAgent.runEmbeddedPiAgent({
     sessionId,
