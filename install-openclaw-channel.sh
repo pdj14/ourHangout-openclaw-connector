@@ -32,8 +32,10 @@ main() {
 
   echo
   echo "[install-openclaw-channel] Next:"
-  echo "  1. Restart the OpenClaw gateway."
-  echo "  2. Run: npm run channel:smoke"
+  echo "  1. Run: npm run channel:doctor"
+  echo "  2. Fix any blocking items from the doctor output."
+  echo "  3. Restart the OpenClaw gateway."
+  echo "  4. Run: npm run channel:smoke"
 }
 
 main "$@"

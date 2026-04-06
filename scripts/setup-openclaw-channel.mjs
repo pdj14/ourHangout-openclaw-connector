@@ -12,6 +12,7 @@ import {
   unwrapEnvelope,
   writeOpenClawConfig
 } from './openclaw-channel-common.mjs';
+import { formatOurHangoutDoctorReport, runOurHangoutDoctor } from './openclaw-channel-doctor.mjs';
 
 function normalizeString(value) {
   return String(value || '').trim();
@@ -163,10 +164,24 @@ async function main() {
     console.log(`  state dir: ${stateDir}`);
   }
   console.log('');
+
+  const doctorReport = await runOurHangoutDoctor({
+    accountAlias,
+    configPath,
+    openClawHome: process.env.OPENCLAW_HOME,
+    pluginPath
+  });
+  console.log(formatOurHangoutDoctorReport(doctorReport));
+  console.log('');
   console.log('Next steps:');
   console.log('  1. Install OpenClaw if it is not installed yet.');
-  console.log('  2. Restart the gateway so it reloads plugins and channel config.');
-  console.log('  3. Run `npm run channel:smoke` in this repo to verify register/ws/sync.');
+  if (doctorReport.ok) {
+    console.log('  2. Restart the gateway so it reloads plugins and channel config.');
+    console.log('  3. Run `npm run channel:smoke` in this repo to verify register/ws/sync.');
+  } else {
+    console.log('  2. Fix the blocking items reported by `channel:doctor` before restarting the gateway.');
+    console.log('  3. Re-run `npm run channel:doctor` and then `npm run channel:smoke`.');
+  }
 }
 
 main().catch((error) => {

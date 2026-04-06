@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node connector.mjs",
     "channel:setup": "node scripts/setup-openclaw-channel.mjs",
+    "channel:doctor": "node scripts/doctor-openclaw-channel.mjs",
     "channel:smoke": "node scripts/smoke-openclaw-channel.mjs"
   },
   "dependencies": {
