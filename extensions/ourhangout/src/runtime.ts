@@ -146,6 +146,12 @@ export class OurHangoutRuntimeWorker {
         limit: 100
       });
 
+      if (Array.isArray(batch.items) && batch.items.length > 0) {
+        this.logger.info?.(
+          `OurHangout sync pulled ${batch.items.length} message(s) for ${this.account.accountId} (nextAfterOrderSeq=${batch.nextAfterOrderSeq})`
+        );
+      }
+
       for (const event of batch.items) {
         await this.handleInboundEvent(event, handler);
       }
@@ -163,7 +169,13 @@ export class OurHangoutRuntimeWorker {
   ): Promise<void> {
     this.afterOrderSeq = Math.max(this.afterOrderSeq, event.orderSeq);
     this.lastMessageAt = event.createdAt;
+    this.logger.info?.(
+      `OurHangout inbound message received (accountId=${event.accountId}, messageId=${event.messageId}, sessionKey=${event.sessionKey})`
+    );
     await handler(event);
+    this.logger.info?.(
+      `OurHangout inbound dispatch completed (accountId=${event.accountId}, messageId=${event.messageId})`
+    );
     this.queuePersistState();
   }
 
